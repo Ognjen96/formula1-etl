@@ -1,0 +1,8 @@
+dataEngineeringDataset.csv
+*.json
+data/
+config/
+.env
+logs/
+__pycache__/
+*.pyc
