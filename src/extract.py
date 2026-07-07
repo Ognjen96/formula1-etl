@@ -3,13 +3,14 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from googleapiclient.http import MediaIoBaseDownload
 import io
+from airflow.models import Variable
 
 KEY_PATH = "/opt/airflow/config/winter-berm-501114-n0-b467bbbd03ef.json"
-FILE_ID = "15JKNL7_Chx8Al0-HDOertqZ0eXMbm_3b"
 LOCAL_PATH = "/opt/airflow/data/dataEngineeringDataset.csv"
 
-def download_from_drive():
 
+def download_from_drive():
+    file_id = Variable.get("gdrive_file_id")
     if os.path.exists(LOCAL_PATH):
         print(f"Fajl vec postoji na {LOCAL_PATH}, preskacem ponovno skidanje fajla")
         return LOCAL_PATH
@@ -18,7 +19,7 @@ def download_from_drive():
 
     service = build("drive", "v3", credentials = creds)
 
-    request = service.files().get_media(fileId=FILE_ID)
+    request = service.files().get_media(fileId=file_id)
     with open(LOCAL_PATH, "wb") as f:
         downloader = MediaIoBaseDownload(f, request)
         done = False

@@ -6,3 +6,4 @@ config/
 logs/
 __pycache__/
 *.pyc
+dags/my_dag.py

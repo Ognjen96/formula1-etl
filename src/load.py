@@ -10,13 +10,24 @@ def get_engine():
 
 def sql_load(dim_tables, fact_tables):
     engine = get_engine()
+
+    with open("/opt/airflow/sql/schema.sql") as f:
+        ddl = f.read()
+    statements = [s.strip() for s in ddl.split(";") if s.strip()]
+    with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as c:
+        for stmt in statements:
+            c.execute(text(stmt))
+
     d_tables = ["DimTime","DimDriver","DimConstructor","DimCircuit","DimRace"]
     data_truncation()
     for name in d_tables: 
         dim_df = pd.read_csv(dim_tables[name])
         dim_df.to_sql(name, engine, if_exists="append", index=False)
+    
     fact_df = pd.read_csv(fact_tables["FactResults"])
-    fact_df.to_sql("FactResults", engine, if_exists="append", index=False)
+    with engine.begin() as conn:
+        fact_df.to_sql("FactResults", conn, if_exists="append", index=False)
+   
     
 
 def data_truncation():
@@ -25,4 +36,4 @@ def data_truncation():
     with engine.connect() as conn:
         for t in table:
             conn.execute(text(f"DELETE FROM {t}"))
-            conn.commit()
+        conn.commit()

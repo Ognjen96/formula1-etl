@@ -22,6 +22,20 @@ def clean_data(df):
     general_info = df.drop(columns = ['stop', 'milliseconds_pitstops']).drop_duplicates(subset = ["resultId"])
     return general_info.merge(pitstop_information, on = "resultId", how = "left")
 
+def time_to_ms(t):
+    if pd.isna(t):
+        return None
+    t = str(t).strip()
+    parts = t.split(":")
+    if len(parts) == 2:                # M:SS.mmm (vreme kruga)
+        m, s = parts
+        return int(int(m) * 60000 + float(s) * 1000)
+    elif len(parts) == 3:              # H:MM:SS.mmm (vreme trke)
+        h, m, s = parts
+        return int(int(h) * 3600000 + int(m) * 60000 + float(s) * 1000)
+    else:
+        return None                    # neočekivan format
+
 def dim_creation(cleaned_df):
     #DimConstructor
     dim_constructor = cleaned_df[dim_constructor_cols].drop_duplicates(subset = ["constructorId"])
@@ -134,6 +148,7 @@ def fact_creation(cleaned_data):
     fact_results["ResultFastestLap"] = pd.to_numeric(fact_results["ResultFastestLap"], errors = "coerce")
     fact_results["ResultFastestLapSpeed"] = pd.to_numeric(fact_results["ResultFastestLapSpeed"], errors = "coerce")
     fact_results["ResultPosition"] = pd.to_numeric(fact_results["ResultPosition"], errors = "coerce")
+    fact_results["ResultFastestLapTimeMs"] = fact_results["ResultFastestLapTimeMs"].apply(time_to_ms)
     fact_results.to_csv("/opt/airflow/data/fact_results.csv", index = False)
     print(fact_results.dtypes)
 
