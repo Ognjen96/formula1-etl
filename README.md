@@ -1,4 +1,4 @@
-[ETL_diagram.drawio](https://github.com/user-attachments/files/29759851/ETL_diagram.drawio)# Formula 1 Data Engineering Pipeline
+# Formula 1 Data Engineering Pipeline
 
 An end-to-end batch ETL pipeline that ingests Formula 1 data, models it into a Kimball star schema in SQL Server, orchestrates the flow with Apache Airflow, and surfaces analytics through Power BI.
 
@@ -43,12 +43,11 @@ The pipeline runs as a three-task Airflow DAG: **extract → transform → load*
 
 ## Data Model
 
-<!-- TODO: add an ERD image and embed it here -->
-<!-- ![ERD](docs/erd.png) -->
+<img width="2340" height="1382" alt="Model databases" src="https://github.com/user-attachments/assets/0e60494b-ae59-4a85-a3a9-1e6f5d54ecff" />
 
 A **star schema** with one fact table and five dimensions.
 
-**Fact:** `FactResults` — one row per driver per race (grain: driver × race).
+**Fact:** `FactResults` — one row per driver per race (grain: One driver per race).
 
 **Dimensions:**
 - `DimDriver`
