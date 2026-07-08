@@ -135,8 +135,11 @@ docker compose exec airflow-scheduler airflow dags trigger ETL_Formula1
 
 ## Dashboard
 
-<!-- TODO: add Power BI screenshots -->
-<!-- ![Dashboard](docs/dashboard.png) -->
+
+<img width="1131" height="642" alt="image" src="https://github.com/user-attachments/assets/9483132c-f1e8-47d9-afb7-d902bffdcd7d" />
+
+<img width="1165" height="738" alt="image" src="https://github.com/user-attachments/assets/de75cb83-1859-4472-a9c4-358e73d6101c" />
+
 
 The Power BI report includes:
 - Points by driver
