@@ -145,22 +145,6 @@ This project keeps **no secrets in source control**. The following are required 
 | SQL Server credentials | Airflow **Connection** (`sql_server_f1`) | Set via Airflow UI |
 | Google Drive file id | Airflow **Variable** (`gdrive_file_id`) | Set via Airflow UI |
 
-SQL Server must have **TCP/IP enabled**, **Mixed Mode authentication**, and a SQL login the container can use.
-
-Add new instance of variable: Airflow -> Admin -> **Variables**
-Key: <Name-of-Variable>
-Value: <Google-file-ID-of-the-CSV>
-
-Add new instance of connections to be able to connect to SQL server: Airflow -> Admin -> **Connections**
-
-Connection ID: <Give-ID>
-Connection Type: generic
-Host: host.docker.internal
-Port: 1433
-Login: <Your-SQL-login>
-Password: <Your-SQL-password>
-Scema: <SQL-DB-Name>
-
 ---
 
 ## Running the Pipeline
