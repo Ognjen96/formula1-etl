@@ -88,20 +88,50 @@ A **star schema** with one fact table and five dimensions.
 - Power BI Desktop (for the dashboard)
 
 ### Steps
+
+#### 1. Clone the repository
 ```bash
-# 1. Clone
-git clone https://github.com/<your-username>/<repo>.git
-cd <repo>
-
-# 2. Add your secrets (see Configuration below)
-#    - place the Google service-account key in config/
-#    - create the SQL Server login
-
-# 3. Start Airflow
-docker compose up -d
+git clone https://github.com//.git
+cd 
 ```
 
-<!-- TODO: fill in exact steps for your environment -->
+#### 2. Prepare SQL Server (on the host)
+- Enable **TCP/IP** (SQL Server Configuration Manager → Protocols → TCP/IP → Enable), set port to **1433**, and restart the SQL Server service.
+- Enable **Mixed Mode authentication** (SSMS → Server Properties → Security), then restart the service.
+- Create a SQL login (e.g. `airflow_user`) with `db_owner` on the target database.
+- Open TCP port **1433** in Windows Firewall.
+
+#### 3. Add the Google service-account key
+- Place your service-account JSON key in `config/` (this folder is git-ignored).
+- Make sure the source CSV on Google Drive is **shared** with the service account's email.
+
+#### 4. Configure environment
+Create a `.env` file in the project root:
+AIRFLOW_UID=50000
+_PIP_ADDITIONAL_REQUIREMENTS=pandas google-api-python-client google-auth google-auth-httplib2 sqlalchemy pymssql
+
+#### 5. Start Airflow
+```bash
+docker compose up -d
+```
+Wait for the containers to be healthy, then open the Airflow UI at `http://localhost:8080`.
+
+#### 6. Create the Airflow Connection and Variable
+In the Airflow UI (**Admin → Connections / Variables**):
+
+**Connection** — `sql_server_f1` (type: Generic)
+| Field | Value |
+|-------|-------|
+| Host | `host.docker.internal` |
+| Port | `1433` |
+| Schema | your database name |
+| Login | `airflow_user` |
+| Password | your password |
+
+**Variable** — `gdrive_file_id`: the Google Drive file ID of the source CSV.
+
+#### 7. Run the pipeline
+Trigger the `ETL_Formula1` DAG from the UI
 
 ---
 
@@ -117,7 +147,19 @@ This project keeps **no secrets in source control**. The following are required 
 
 SQL Server must have **TCP/IP enabled**, **Mixed Mode authentication**, and a SQL login the container can use.
 
-<!-- TODO: note the exact Airflow Connection / Variable names and fields -->
+Add new instance of variable: Airflow -> Admin -> **Variables**
+Key: <Name-of-Variable>
+Value: <Google-file-ID-of-the-CSV>
+
+Add new instance of connections to be able to connect to SQL server: Airflow -> Admin -> **Connections**
+
+Connection ID: <Give-ID>
+Connection Type: generic
+Host: host.docker.internal
+Port: 1433
+Login: <Your-SQL-login>
+Password: <Your-SQL-password>
+Scema: <SQL-DB-Name>
 
 ---
 
@@ -128,8 +170,7 @@ SQL Server must have **TCP/IP enabled**, **Mixed Mode authentication**, and a SQ
 docker compose exec airflow-scheduler airflow dags trigger ETL_Formula1
 ```
 
-<!-- TODO: add a screenshot of the DAG graph -->
-<!-- ![DAG](docs/dag.png) -->
+<img width="971" height="372" alt="image" src="https://github.com/user-attachments/assets/0b59f5d7-2c8b-4381-a976-705117060548" />
 
 ---
 
@@ -140,12 +181,14 @@ docker compose exec airflow-scheduler airflow dags trigger ETL_Formula1
 
 <img width="1165" height="738" alt="image" src="https://github.com/user-attachments/assets/de75cb83-1859-4472-a9c4-358e73d6101c" />
 
+<img width="393" height="704" alt="image" src="https://github.com/user-attachments/assets/692e4458-10dd-4a91-b6f0-9c3f7d8da20a" />
+
 
 The Power BI report includes:
 - Points by driver
 - Points by constructor
 - Circuits map (bubble size = number of races)
-- <!-- TODO: list the rest of your visuals -->
+- Fastest tracks
 
 ---
 
@@ -156,8 +199,8 @@ The Power BI report includes:
 
 - **Batch over streaming (no Kafka):** the ingestion pattern here is periodic full refresh, which is representative of most real-world pipelines; a streaming layer would add complexity without a real-time requirement.
 - **Star schema:** chosen for clean, fast analytical queries and natural fit with Power BI.
-- **Natural vs. surrogate keys:** <!-- TODO: one line on your choice -->
-- **Idempotent load (truncate-and-load):** safe to re-run; fits Airflow's retry model.
+- **Natural vs. surrogate keys:** Used natural keys (Source provided IDs like driverId, raceId, etc) over surrogate keys. Acceptable here because the historical data is static and never versioned. DimTime is the one exception, using a computed YYYYMMDD surrogate.
+- **Idempotent load (truncate-and-load):** safe to re-run, fits Airflow's retry model.
 
 ---
 
