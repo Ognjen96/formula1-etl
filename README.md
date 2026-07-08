@@ -32,7 +32,7 @@ The pipeline runs as a three-task Airflow DAG: **extract → transform → load*
 
 | Layer | Technology |
 |-------|-----------|
-| Orchestration | Apache Airflow 3.x (Docker) |
+| Orchestration | Apache Airflow 3.2.2 (Docker) |
 | Processing | Python, pandas |
 | Storage / Warehouse | Microsoft SQL Server (Express) |
 | Source | Google Drive (Service Account API) |
